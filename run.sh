@@ -3,4 +3,6 @@ python clustering.py \
     --jobs jobs.txt \
     --countries countries.txt \
     --embed used_word_embeddings.txt \
+    --stddev 1.0 \
+    --threshold 0.95 \
 
