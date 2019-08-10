@@ -1,3 +1,8 @@
+'''
+This script generate user data randomly
+and has some simple rules which should be modified
+and constrained in the future.
+'''
 import random
 import pprint
 
@@ -16,11 +21,11 @@ def get_gender():
 
 def get_education(age):
     if age <= 6:
-        return random.choice(['infant', 'junior'])
+        return random.choice(['infant', 'primary school'])
     elif age <= 15:
-        return random.choice(['junior', 'secondary'])
+        return random.choice(['primary school', 'secondary school'])
     else:
-        return random.choice(['junior', 'secondary', 'university'])
+        return random.choice(['primary school', 'secondary school', 'bachelor degree', 'master degree', 'doctoral degree'])
 
 def get_occupation(jobs, age):
     if age <= 3:
