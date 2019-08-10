@@ -102,7 +102,7 @@ def pre_processing(X, std_dev=1, threshold=0.80):
     return Y
 
 def Kmeans_clustering(X):
-    y = KMeans(n_clusters=2, random_state=0).fit_predict(X)
+    labels = KMeans(n_clusters=2, random_state=0).fit_predict(X)
 
     # Add some visualization
     pca = PCA(n_components=2)
@@ -111,7 +111,7 @@ def Kmeans_clustering(X):
     y = manifold[:, 1]
     plt.scatter(x, y, c=labels)
     plt.show()
-    return y
+    return labels
 
 def SpecClustering(X):
     # Compute affinity matrices
@@ -167,9 +167,9 @@ for user in users:
 # data visualization
 user_matrix = np.array(user_vecs)
 # Use k-means clustering, input number of clusters
-# labels = Kmeans_clustering(user_matrix)
+labels = Kmeans_clustering(user_matrix)
 # Use spectral clustering
-SpecClustering(user_matrix)
+# SpecClustering(user_matrix)
 # Now use PCA for visualization
 # PCA extract the 2 dimensions with the highest variance from
 # a high dimensional space using linear transform
