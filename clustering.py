@@ -128,16 +128,16 @@ def SpecClustering(X):
     print(eigVal[0:20])
     Valptr = eigVal[0]
     ValRatio = []
-    count = 2
+    count = 0
     while Valptr > 0 and count < 18:
             count += 1
             Valptr = eigVal[count]
             ValRatio.append(eigVal_abs[count] / eigVal_abs[count+1])
-    cluster_number = np.argmax(ValRatio)
-    print('Cluster number is {}'.format(cluster_number+2))
+    cluster_number = np.argmax(ValRatio) + 2
+    print('Cluster number is {}'.format(cluster_number))
 
     # Calculate cluster labels
-    spectral = SpectralClustering(n_clusters=cluster_number+2, eigen_solver='arpack', affinity='precomputed')
+    spectral = SpectralClustering(n_clusters=cluster_number, eigen_solver='arpack', affinity='precomputed')
     spectral.fit(metric)
     y_pred = spectral.labels_.astype(np.int)
     print("Finished clustering")
@@ -167,9 +167,9 @@ for user in users:
 # data visualization
 user_matrix = np.array(user_vecs)
 # Use k-means clustering, input number of clusters
-labels = Kmeans_clustering(user_matrix)
+# labels = Kmeans_clustering(user_matrix)
 # Use spectral clustering
-# SpecClustering(user_matrix)
+SpecClustering(user_matrix)
 # Now use PCA for visualization
 # PCA extract the 2 dimensions with the highest variance from
 # a high dimensional space using linear transform
