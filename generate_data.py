@@ -22,6 +22,8 @@ def get_gender():
 def get_education(age):
     if age <= 6:
         return random.choice(['infant', 'primary school'])
+    elif age <= 12:
+        return 'primary school'
     elif age <= 15:
         return random.choice(['primary school', 'secondary school'])
     else:

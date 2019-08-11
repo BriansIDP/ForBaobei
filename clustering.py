@@ -2,8 +2,8 @@
 This is the main script for clustering
 '''
 import argparse
-import generate_data
 from collections import defaultdict
+from pprint import pprint
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
@@ -105,7 +105,7 @@ def pre_processing(X, std_dev=1, threshold=0.80):
 def calc_centroids(X):
     return np.mean(X, axis=0)
 
-def KmeansClustering(X, num_of_clusters):
+def KmeansClustering(X, num_of_clusters, plot=False):
     labels = KMeans(n_clusters=num_of_clusters, random_state=0).fit_predict(X)
 
     # Add some visualization
@@ -126,12 +126,13 @@ def KmeansClustering(X, num_of_clusters):
     cent_x = transformed_centroids[:, 0]
     cent_y = transformed_centroids[:, 1]
 
-    plt.figure(figsize=(9, 3))
-    title = 'K-means Clustering'
-    plt.title(title, size=9)
-    plt.scatter(x, y, c=labels, s=10)
-    plt.scatter(cent_x, cent_y, c='red', s=16)
-    plt.show()
+    if plot:
+        plt.figure(figsize=(9, 3))
+        title = 'K-means Clustering'
+        plt.title(title, size=9)
+        plt.scatter(x, y, c=labels, s=10)
+        plt.scatter(cent_x, cent_y, c='red', s=16)
+        plt.show()
     return labels, clusters, centroids
 
 def KMeansOnlineAddOne(x, clusters, centroids):
@@ -189,6 +190,11 @@ def SpecClustering(X):
     plt.scatter(X_vis[:, 0], X_vis[:, 1], c=y_pred)
     plt.show()
 
+def AssignIDBack(users, labels):
+    for i, user in enumerate(users):
+        user['group_id'] = labels[i]
+    return users
+
 #---------------------------------------------------------
 # The main script
 #--------------------------------------------------------
@@ -199,11 +205,16 @@ for user in users:
 # data visualization
 user_matrix = np.array(user_vecs)
 # Use k-means clustering, input number of clusters
-labels, clusters, centroids = KmeansClustering(user_matrix, 3)
+labels, clusters, centroids = KmeansClustering(user_matrix, 3, plot=False)
+# Assign group ID back to user
+users = AssignIDBack(users, labels)
+# Get a new user
 new_user = generate_data.generate(1, args.jobs, args.countries)[0]
 new_user_vec = get_user_embeddings(new_user)
+# Group a new user
 label, clusters, centroids = KMeansOnlineAddOne(new_user_vec, clusters, centroids)
 print(label)
+pprint(new_user)
 # Use spectral clustering
 # SpecClustering(user_matrix)
 # Now use PCA for visualization
