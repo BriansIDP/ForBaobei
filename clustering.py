@@ -3,6 +3,7 @@ This is the main script for clustering
 '''
 import argparse
 import generate_data
+from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
@@ -101,17 +102,48 @@ def pre_processing(X, std_dev=1, threshold=0.80):
                   Y[i][j] = max(X[i][j], X[j][i])
     return Y
 
-def Kmeans_clustering(X):
-    labels = KMeans(n_clusters=2, random_state=0).fit_predict(X)
+def calc_centroids(X):
+    return np.mean(X, axis=0)
+
+def KmeansClustering(X, num_of_clusters):
+    labels = KMeans(n_clusters=num_of_clusters, random_state=0).fit_predict(X)
 
     # Add some visualization
     pca = PCA(n_components=2)
-    manifold = pca.fit_transform(user_matrix)
+    pca.fit(user_matrix)
+    manifold = pca.transform(user_matrix)
     x = manifold[:, 0]
     y = manifold[:, 1]
-    plt.scatter(x, y, c=labels)
+    clusters = defaultdict(list)
+    centroids = {}
+    for i, vec in enumerate(X):
+        cluster_id = labels[i]
+        clusters[cluster_id].append(vec)
+    for i, cluster in clusters.items():
+        centroids[i] = calc_centroids(cluster)
+    centroids_X = np.stack(list(centroids.values()))
+    transformed_centroids = pca.transform(centroids_X)
+    cent_x = transformed_centroids[:, 0]
+    cent_y = transformed_centroids[:, 1]
+
+    plt.figure(figsize=(9, 3))
+    title = 'K-means Clustering'
+    plt.title(title, size=9)
+    plt.scatter(x, y, c=labels, s=10)
+    plt.scatter(cent_x, cent_y, c='red', s=16)
     plt.show()
-    return labels
+    return labels, clusters, centroids
+
+def KMeansOnlineAddOne(x, clusters, centroids):
+    min_dist = 100000
+    for i, cent in centroids.items():
+        dist = np.linalg.norm(cent-x)
+        if dist < min_dist:
+            min_dist = dist
+            min_label = i
+    clusters[min_label].append(x)
+    centroids[min_label] = calc_centroids(clusters[min_label])
+    return min_label, clusters, centroids
 
 def SpecClustering(X):
     # Compute affinity matrices
@@ -149,7 +181,7 @@ def SpecClustering(X):
     title = 'Spectral Clustering'
     plt.title(title, size=9)
 
-    # plot the result of pre-processing
+    # plot the result 
     plt.subplot(1, 2, 1)
     plt.title('Combined Similarity', size=12)
     plt.imshow(1-metric, cmap='gray', interpolation='nearest')
@@ -167,9 +199,13 @@ for user in users:
 # data visualization
 user_matrix = np.array(user_vecs)
 # Use k-means clustering, input number of clusters
-# labels = Kmeans_clustering(user_matrix)
+labels, clusters, centroids = KmeansClustering(user_matrix, 3)
+new_user = generate_data.generate(1, args.jobs, args.countries)[0]
+new_user_vec = get_user_embeddings(new_user)
+label, clusters, centroids = KMeansOnlineAddOne(new_user_vec, clusters, centroids)
+print(label)
 # Use spectral clustering
-SpecClustering(user_matrix)
+# SpecClustering(user_matrix)
 # Now use PCA for visualization
 # PCA extract the 2 dimensions with the highest variance from
 # a high dimensional space using linear transform
